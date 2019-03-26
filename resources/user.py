@@ -1,16 +1,10 @@
-import sqlite3
-
 import bcrypt
 from flask_restful import Resource, reqparse
-from werkzeug.security import generate_password_hash
-
 from models.user import UserModel
 
 
 class UserRegister(Resource):
     def post(self):
-        connection = sqlite3.connect('data.db')
-        cursor = connection.cursor()
         req = reqparse.RequestParser()
         req.add_argument(
             'username', type=str, required=True, help="username is required")
