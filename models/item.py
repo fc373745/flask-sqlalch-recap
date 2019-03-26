@@ -17,7 +17,7 @@ class ItemModel(db.Model):
         self.price = price
 
     def json(self):
-        return {'name': self.name, 'price': self.price}
+        return {'id': self.id, 'name': self.name, 'price': self.price, 'store_id': self.store_id}
 
     @classmethod
     def find_by_name(cls, name):
@@ -59,3 +59,6 @@ class ItemModel(db.Model):
         # connection.commit()
         # connection.close()
         # return {'message': 'Item deleted'}
+    @classmethod
+    def find_all(cls):
+        return cls.query.all()

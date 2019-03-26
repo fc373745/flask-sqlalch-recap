@@ -1,12 +1,11 @@
-from flask_jwt import JWT, jwt_required
+from flask_jwt_extended import get_jwt_claims, jwt_required
 from flask_restful import Resource, reqparse
-
 from models.item import ItemModel
 
 
 class Item(Resource):
 
-    @jwt_required()
+    @jwt_required
     def get(self, name):
         # return {"items": ItemModel.query.all()}
         item = ItemModel.find_by_name(name)
@@ -26,7 +25,7 @@ class Item(Resource):
             'store_id', type=int, required=True, help="need a store_id field")
 
         data = req.parse_args()
-        item = ItemModel(name, data['price'], data['store_id'])
+        item = ItemModel(name, **data)
 
         try:
             item.save_to_db()
@@ -35,7 +34,11 @@ class Item(Resource):
 
         return item.json(), 201
 
+    @jwt_required
     def delete(self, name):
+        claims = get_jwt_claims()
+        if not claims['is_admin']:
+            return {'message': 'Admin privilege required'}, 401
         item = ItemModel.find_by_name(name)
         if item:
             item.delete_from_db()
@@ -63,7 +66,7 @@ class Item(Resource):
         item = ItemModel.find_by_name(name)
 
         if item is None:
-            item = ItemModel(name, data['price'], data['store_id'])
+            item = ItemModel(name, **data)
         else:
             item.price = data['price']
 
@@ -86,7 +89,7 @@ class Item(Resource):
 
 class ItemList(Resource):
     def get(self):
-        return {"items": [item.json() for item in ItemModel.query.all()]}
+        return {"items": [item.json() for item in ItemModel.find_all()]}
         # connection = sqlite3.connect('data.db')
         # cursor = connection.cursor()
 
